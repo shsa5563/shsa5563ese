@@ -1,5 +1,5 @@
 #Make File for Project 1
-include source.mk
+include source_1.mk
 target=host
 CC=gcc
 CFLAGS= -Wall -g -O0 -std=c99
@@ -47,12 +47,12 @@ compile-all:
 	make $(OBJ)
 
 .PHONY: build
-build: $(SRC)
+build:$(SRC)
 	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -v $^ -o $(EXE)
 	make $(DEPS)
 
 .PHONY: build-all
-build-all: $(SRC)
+build-all:$(SRC)
 	$(CC) $(FRDM_FLAG) $(CFLAGS) $(MAP_FLAG) -I$(HEAD) -v $^ -o $(EXE)
 	make $(DEPS)
 	size $(EXE)
@@ -70,7 +70,7 @@ build-all: $(SRC)
 	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -S $< -o Assembly/$@
 
 %.dep:%.c
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -MM $< -o $@
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -MM $< -o $@
 
 upload:
 	ssh $(BBB_Connection) "rm -rf /home/debian/bin/release"
@@ -79,7 +79,7 @@ upload:
 
 .PHONY : clean
 clean :
-	-rm -f *.dep *.map *.a project
+	-rm -f *.dep *.map *.a project *.o *.i *.s
 	-rm -rf Assembly
 	-rm -rf Preprocess
 	-rm -rf Object
