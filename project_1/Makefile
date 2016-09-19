@@ -48,23 +48,26 @@ compile-all:
 
 .PHONY: build
 build: $(SRC)
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -v $^ -o $(EXE)
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -v $^ -o $(EXE)
 	make $(DEPS)
 
 .PHONY: build-all
 build-all: $(SRC)
-	$(CC) $(FRDM_FLAG) $(CFLAGS) $(MAP_FLAG) -v $^ -o $(EXE)
+	$(CC) $(FRDM_FLAG) $(CFLAGS) $(MAP_FLAG) -I$(HEAD) -v $^ -o $(EXE)
 	make $(DEPS)
 	size $(EXE)
 	
 %.o: %.c
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -c $< -o object/$@ 
+	mkdir -p Object
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -c $< -o Object/$@ 
 	$(OBJDUMP)
 %.i: %.c
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -E -I$(HEAD)  $< -o $@ 
+	mkdir -p Preprocess
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -E $< -o Preprocess/$@ 
 
-%.s: %.c 
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -S $< -o assembly/$@
+%.s: %.c
+	mkdir -p Assembly
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -S $< -o Assembly/$@
 
 %.dep:%.c
 	$(CC) $(FRDM_FLAG) $(CFLAGS) -MM $< -o $@
@@ -76,5 +79,7 @@ upload:
 
 .PHONY : clean
 clean :
-	-rm -f *.o *.i *.dep *.lib *.s *.map *.a project
-
+	-rm -f *.dep *.map *.a project
+	-rm -rf Assembly
+	-rm -rf Preprocess
+	-rm -rf Object
