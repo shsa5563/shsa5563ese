@@ -3,12 +3,19 @@ include source.mk
 target=host
 CC=gcc
 CFLAGS= -Wall -g -O0 -std=c99
-DEPS = hw1.h
+
 EXE= project 
 BBB_Connection =root@192.168.7.2
 FRDM_FLAG=
 MAP_FLAG = -Wl,-Map,$(strip $(EXE)).map
 OBJDUMP= 
+
+
+DEPS:=$(SRC:.c=.dep)
+PRE:=$(SRC:.c=.i)
+ASM:=$(SRC:.c=.s)
+OBJ:=$(SRC:.c=.o)
+
 ifeq ($(platform),host)
 CC=gcc
 else ifeq ($(platform),bbb)
@@ -18,21 +25,22 @@ CC= arm-none-eabi-gcc
 FRDM_FLAG= --specs=rdimon.specs
 endif
 
-ifeq ($(ss),true)
+ifeq ($(objdump),true)
 OBJDUMP=objdump -d object/$@ 
 endif
 
 .PHONY: build-lib
-build-lib: $(SRC)
-	ar rvs libproject1.a $(SRC)
+build-lib: $(LIB)
+	ar rvs libproject1.a $(LIB)
 
 .PHONY: file.i
-file.i:$(PRE)
+file.i:
+	make $(PRE)
 	
 .PHONY: file.s
-file.s:$(ASM)
+file.s:
+	make $(ASM)
 
-DEPS:=$(SRC:.c=.dep)
 
 .PHONY: compile-all
 compile-all:
@@ -50,17 +58,13 @@ build-all: $(SRC)
 	size $(EXE)
 	
 %.o: %.c
-	mkdir -p object
-	touch object/$@	
-	$(CC) $(CFLAGS) -c $< -o object/$@ 
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -c $< -o object/$@ 
 	$(OBJDUMP)
 %.i: %.c
-	mkdir -p preprocess
-	touch preprocess/$@
-	$(CC) $(CFLAGS) -E $< -o preprocess/$@  
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -E -I$(HEAD)  $< -o $@ 
+
 %.s: %.c 
-	mkdir -p assembly
-	$(CC) $(CFLAGS) -S $< -o assembly/$@
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -S $< -o assembly/$@
 
 %.dep:%.c
 	$(CC) $(FRDM_FLAG) $(CFLAGS) -MM $< -o $@
@@ -72,8 +76,5 @@ upload:
 
 .PHONY : clean
 clean :
-	-rm -r  object
-	-rm -r assembly
-	-rm -r preprocess
-	-rm -f $(EXE) 
+	-rm -f *.o *.i *.dep *.lib *.s *.map *.a project
 
