@@ -6,11 +6,15 @@ CFLAGS= -Wall -g -O0 -std=c99
 DEPS = hw1.h
 EXE= project 
 BBB_Connection =root@192.168.7.2
+FRDM_FLAG= --specs=rdimon.specs
 
-ifeq(target,host)
-{
-$(CC)=gcc
-}
+ifeq ($(platform),host)
+CC=gcc
+else ifeq ($(platform),bbb)
+CC=arm-linux-gnueabihf-gcc
+else ifeq ($(platform),frdm)
+CC= arm-none-eabi-gcc
+endif
 
 .PHONY: build-lib
 build-lib: $(SRC)
@@ -22,14 +26,16 @@ file.i:$(PRE)
 .PHONY: file.s
 file.s:$(ASM)
 
+DEPS:=$(SRC:.c=.dep)
+
 .PHONY: compile-all
 compile-all:
 	make $(OBJ)
 	
 .PHONY: build
 build: $(SRC)
-	#mkdir -p object
-	$(CC) $(CFLAGS) $^ -o $(EXE)
+	$(CC) $(FRDM_FLAG) $(CFLAGS) $^ -o $(EXE)
+	make $(DEPS)
 	
 %.o: %.c
 	mkdir -p object
@@ -43,6 +49,9 @@ build: $(SRC)
 	mkdir -p assembly
 	$(CC) $(CFLAGS) -S $< -o assembly/$@
 
+%.dep:%.c
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -MM $< -o $@
+
 upload:
 	ssh $(BBB_Connection) "rm -rf /home/debian/bin/release"
 	ssh $(BBB_Connection) "mkdir /home/debian/bin/release"
@@ -55,4 +64,3 @@ clean :
 	-rm -r preprocess
 	-rm -f $(EXE) 
 
-#$(EXE): $(OBJ)
