@@ -1,5 +1,8 @@
 #Make File for Project 1
-include source.mk
+#Author Shekhar Satyanarayana, Rohit Sali
+#09-19-2016
+
+include source_1.mk
 target=host
 CC=gcc
 CFLAGS= -Wall -g -O0 -std=c99
@@ -9,7 +12,7 @@ BBB_Connection =root@192.168.7.2
 FRDM_FLAG=
 MAP_FLAG = -Wl,-Map,$(strip $(EXE)).map
 OBJDUMP= 
-
+DFLAG=
 
 DEPS:=$(SRC:.c=.dep)
 PRE:=$(SRC:.c=.i)
@@ -27,6 +30,10 @@ endif
 
 ifeq ($(objdump),true)
 OBJDUMP=objdump -d object/$@ 
+endif
+
+ifeq ($(CSWITCH),ON)
+DFLAG=-DProject_1=1
 endif
 
 .PHONY: build-lib
@@ -47,13 +54,13 @@ compile-all:
 	make $(OBJ)
 
 .PHONY: build
-build: $(SRC)
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -v $^ -o $(EXE)
+build:$(SRC)
+	$(CC) $(FRDM_FLAG) $(DFLAG) $(CFLAGS) -I$(HEAD) -v $^ -o $(EXE)
 	make $(DEPS)
 
 .PHONY: build-all
-build-all: $(SRC)
-	$(CC) $(FRDM_FLAG) $(CFLAGS) $(MAP_FLAG) -I$(HEAD) -v $^ -o $(EXE)
+build-all:$(SRC)
+	$(CC) $(FRDM_FLAG) $(DFLAG) $(CFLAGS) $(MAP_FLAG) -I$(HEAD) -v $^ -o $(EXE)
 	make $(DEPS)
 	size $(EXE)
 	
@@ -70,7 +77,7 @@ build-all: $(SRC)
 	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -S $< -o Assembly/$@
 
 %.dep:%.c
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -MM $< -o $@
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -I$(HEAD) -MM $< -o $@
 
 upload:
 	ssh $(BBB_Connection) "rm -rf /home/debian/bin/release"
@@ -79,7 +86,7 @@ upload:
 
 .PHONY : clean
 clean :
-	-rm -f *.dep *.map *.a project
+	-rm -f *.dep *.map *.a project *.o *.i *.s
 	-rm -rf Assembly
 	-rm -rf Preprocess
 	-rm -rf Object

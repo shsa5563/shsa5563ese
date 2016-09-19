@@ -7,6 +7,7 @@ BBB_Connection =root@192.168.7.2 						-- give the static IP root address of Bea
 FRDM_FLAG=									--giving no values to Freescale Freedom Platform Flag 
 MAP_FLAG = -Wl,-Map,$(strip $(EXE)).map 					--Mapping Flags
 OBJDUMP= 									--giving no values to the Objdump (input from user -default 											  value is empty)
+DFLAG= 										--DFLAg is used for compile time switch- defalut value is none
 DEPS:=$(SRC:.c=.dep)								--The source .c files must be linked/converted to .dep files 
 										  (for Dependency files)
 PRE:=$(SRC:.c=.i)								--The source .c files must be linked/converted to .i files 											  (for Preprocessor)
@@ -24,6 +25,10 @@ endif
 
 ifeq ($(objdump),true) 								--check if the user wants to dump the compiled code
 OBJDUMP=objdump -d object/$@ 							--if so then dump the files usin the shown command
+endif
+
+ifeq ($(CSWITCH), ON)								--check if the compile time switch is yes or no.
+DFLAG=-DProject_1=1								--put the value in the DFLAG to use it during Build/Build-all
 endif
 
 .PHONY: build-lib								--to build the liraries of the memory.c and data.c
@@ -55,13 +60,16 @@ build-all: $(SRC)
 	size $(EXE)								--to calculate the size of the executable file
 	
 %.o: %.c
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -c  -I$(HEAD) $< -o object/$@		--to create the object files from the source files
+	mkdir Object
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -c  -I$(HEAD) $< -o Object/$@		--to create the object files from the source files
 	$(OBJDUMP)								--to dump the compiled codes
-%.i: %.c									
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -E -I$(HEAD)  $< -o $@ 			--to create the preprocessed file from the source files
+%.i: %.c
+	mkdir Preprocessor									
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -E -I$(HEAD)  $< -o Preprocessor/$@	--to create the preprocessed file from the source files
 																			
- %.s: %.c 
-	$(CC) $(FRDM_FLAG) $(CFLAGS) -S  -I$(HEAD) $< -o assembly/$@		--to create the assembly files from the source files
+ %.s: %.c
+	mkdir Assembly 
+	$(CC) $(FRDM_FLAG) $(CFLAGS) -S  -I$(HEAD) $< -o Assembly/$@		--to create the assembly files from the source files
 
 %.dep:%.c
 	$(CC) $(FRDM_FLAG) $(CFLAGS) -MM $< -o $@				--to create the dependency for the source files
@@ -74,4 +82,6 @@ upload:
 .PHONY : clean									--to clean all the generated files in the directory including
 clean :										  the executable files
 	-rm -f *.o *.i *.dep *.lib *.s *.map *.a project
-
+        -rm -rf Objects								--remove object folder-contains the generated object files
+  	-rm -rf Preprocessor							--remove preprocessor foldes - has generated preprocessor file
+	-rm -rf Assembly							--remove 
