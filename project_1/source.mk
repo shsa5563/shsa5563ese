@@ -14,6 +14,7 @@ PRE= \
 ASM= \
      main.s\
      hw1.s
+HEAD= /Headers
 
 VPATH: memory data preprocess 
 
