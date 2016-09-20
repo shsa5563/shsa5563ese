@@ -5,7 +5,7 @@ SRC= \
      main.c\
      memory.c\
      project_1.c\
-
+     data.c
 
 HEAD=./Headers
 

@@ -1,7 +1,6 @@
 #Make File for Project 1
 #Author Shekhar Satyanarayana, Rohit Sali
 #09-19-2016
-
 include source_1.mk
 target=host
 CC=gcc

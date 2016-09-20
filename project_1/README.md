@@ -82,6 +82,6 @@ upload:
 .PHONY : clean									--to clean all the generated files in the directory including
 clean :										  the executable files
 	-rm -f *.o *.i *.dep *.lib *.s *.map *.a project
-        -rm -rf Objects								--remove object folder-contains the generated object files
+	-rm -rf Objects								--remove object folder-contains the generated object files
   	-rm -rf Preprocessor							--remove preprocessor foldes - has generated preprocessor file
 	-rm -rf Assembly							--remove 
