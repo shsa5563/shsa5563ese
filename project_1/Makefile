@@ -28,7 +28,7 @@ FRDM_FLAG= --specs=rdimon.specs
 endif
 
 ifeq ($(objdump),true)
-OBJDUMP=objdump -d object/$@ 
+OBJDUMP=objdump -d Object/$@ 
 endif
 
 ifeq ($(CSWITCH),ON)
